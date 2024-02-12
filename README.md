@@ -25,3 +25,4 @@ Run `ng e2e` to execute the end-to-end tests via a platform of your choice. To u
 ## Further help
 
 To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI Overview and Command Reference](https://angular.io/cli) page.
+"\_comment": "the proxy.config.json file is used when you want to make an request to the server it is like using cross origin in frontend so whenever a request is made from frontend that req goes through proxy server and proxy server passes the request to the backend if you have use cors in thee backend then no need to setup proxy.config.json file here",

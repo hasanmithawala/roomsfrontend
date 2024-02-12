@@ -1,0 +1,31 @@
+<!-- <h1>Welcome to {{ hotelName }}</h1> -->
+<app-header></app-header>
+<app-header></app-header>
+<app-header></app-header>
+<div [hidden]="hideRooms">
+  Number of rooms:
+  <!-- binding NumberofRooms variable  with innerText property that is []  -->
+  <h3
+    [ngStyle]="{ color: rooms.availableRooms ? 'green' : 'red' }"
+    [innerText]="NumberofRooms"
+  ></h3>
+</div>
+{{ rooms?.availableRooms ?? "No Rooms" }}
+<div *ngIf="selectedRoom">
+  {{ selectedRoom | json }}
+</div>
+<div>
+  <button (click)="addRoom()">Add Room</button>
+</div>
+<div *ngIf="hideRooms">
+  <app-rooms-list
+    (roomSelected)="selectRoom($event)"
+    [rooms]="roomList"
+    [title]="title"
+  ></app-rooms-list>
+  <!-- the $event is coming from the child component or this is the event that is recieved by my child component -->
+</div>
+
+<button (click)="toggle()">
+  {{ hideRooms ? "Hide Rooms" : "Show Rooms" }}
+</button>
