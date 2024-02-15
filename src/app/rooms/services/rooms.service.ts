@@ -3,7 +3,7 @@ import { RoomsList } from '../rooms';
 import { environment } from '../../../environments/environment';
 import { APP_SERVICE_CONFIG } from 'src/app/AppConfig/appconfig.service';
 import { Appconfig } from 'src/app/AppConfig/appconfig.interface';
-import { HttpClient, HttpRequest } from '@angular/common/http';
+import { HttpClient, HttpHeaders, HttpRequest } from '@angular/common/http';
 import { shareReplay } from 'rxjs';
 @Injectable({
   providedIn: 'root',
@@ -18,21 +18,28 @@ export class RoomsService {
     // console.log('Rooms Service is intialized');
     // console.log(environment.apiEndPoint);
   }
-  getRooms$ = this.http.get<RoomsList[]>('/api/rooms').pipe(
-    shareReplay(1)
-    // we have to modify the stream or filtered something before subscribing the data here what it does
-    // we are going repeat or replay the last 1 record we have recieved
-    // Sharing the Subscription: By sharing the observable's subscription among multiple subscribers, shareReplay ensures that there's only one underlying subscription to the observable, regardless of how many times it's subscribed to. This prevents redundant requests or computations by allowing multiple subscribers to share the same stream of data.
+  headers = new HttpHeaders({ token: '123456HM' });
+  getRooms$ = this.http
+    .get<RoomsList[]>('/api/rooms', { headers: this.headers })
+    .pipe(
+      shareReplay(1)
+      // we have to modify the stream or filtered something before subscribing the data here what it does
+      // pipe means the above sentence
+      // we are going to  repeat or replay the last 1 record we have recieved
+      // Sharing the Subscription: By sharing the observable's subscription among multiple subscribers, shareReplay ensures that there's only one underlying subscription to the observable, regardless of how many times it's subscribed to. This prevents redundant requests or computations by allowing multiple subscribers to share the same stream of data.
 
-    // Replaying Values: Additionally, shareReplay replays the last emitted value (or a specified number of previous values) to new subscribers. This means that new subscribers don't trigger additional side effects or redundant requests, as they immediately receive the last emitted value without re-executing the observable's source.
-  );
+      // Replaying Values: Additionally, shareReplay replays the last emitted value (or a specified number of previous values) to new subscribers. This means that new subscribers don't trigger additional side effects or redundant requests, as they immediately receive the last emitted value without re-executing the observable's source.
+      // so basically here we are caching the request only one request
+    );
   // we cannot modify the stream after we have subscribe to it stream can be modified inside a function that function is known as pipe
   getRooms() {
     return this.http.get<RoomsList[]>('/api/rooms');
     // whatever data i am getting just transform that data into RoomsList array
   }
   addRoom(room: RoomsList) {
-    return this.http.post<RoomsList[]>('/api/rooms', room);
+    return this.http.post<RoomsList[]>('/api/rooms', room, {
+      headers: this.headers,
+    });
     // after adding the latest  record give me the all the data
   }
   editRoom(room: RoomsList) {

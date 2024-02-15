@@ -25,7 +25,7 @@ import { RoomsList } from '../rooms';
   // With ChangeDetectionStrategy.OnPush, Angular triggers change detection for a component only when its input properties change by reference. If the reference to an input property remains the same, Angular won't perform change detection for that component, even if the properties of the object itself have changed.
 })
 export class RoomsListComponent implements OnInit, OnChanges, OnDestroy {
-  @Input() rooms: RoomsList[] = [];
+  @Input() rooms: RoomsList[] | null = [];
   @Input() title: string = '';
 
   // Output are actually an events

@@ -4,6 +4,7 @@ import {
   Component,
   DoCheck,
   OnChanges,
+  OnDestroy,
   OnInit,
   QueryList,
   SimpleChanges,
@@ -14,7 +15,7 @@ import {
 import { Rooms, RoomsList } from './rooms';
 import { HeaderComponent } from '../header/header.component';
 import { RoomsService } from './services/rooms.service';
-import { Observable } from 'rxjs';
+import { Observable, Subject, Subscription, catchError, map, of } from 'rxjs';
 import { HttpEventType } from '@angular/common/http';
 
 @Component({
@@ -23,12 +24,20 @@ import { HttpEventType } from '@angular/common/http';
   styleUrls: ['./rooms.component.scss'],
 })
 export class RoomsComponent
-  implements OnInit, DoCheck, AfterViewInit, AfterViewChecked
+  implements OnInit, DoCheck, AfterViewInit, AfterViewChecked, OnDestroy
 {
   hotelName: string = 'Rameshwaram Hotel';
   NumberofRooms: number = 10;
   hideRooms: boolean = true;
   totalBytes = 0;
+  subscription!: Subscription;
+  error$ = new Subject<string>();
+  getError$ = this.error$.asObservable();
+  // i am going to subscribe to this is an active stream
+  // subject is a type provided by RXJS that acts both as observable and an observer
+  // <string> specifies the type of values that this subject will emit, indicating that it will emit strings.
+  // Subject is a type typically used in Reactive Programming libraries like RxJS. It represents an object that is both an observable and an observer. It can emit values to its subscribers, and it can also be subscribed to, to receive values.
+  // this is a error stream which will act as both observer and observable
   selectedRoom!: RoomsList;
   rooms: Rooms = {
     totalRooms: 20,
@@ -42,7 +51,7 @@ export class RoomsComponent
     // now we can subscribe to this observer which can give new stream everytime you are calling this stream
     // one thing is observable in which your user will subscribe to and internally observable will have observer which will observe the data if there is a new value which is available
     // where this is useful lets say you are working with real time database whenever a new value is pushed because its a pushed based architecture your observer will observe there is a new value what i have to is i have to call next()
-    // this particualr will have string of data
+    // this particular will have string of data
     observer.next('user1');
     observer.next('user2');
     observer.next('user3');
@@ -66,6 +75,19 @@ export class RoomsComponent
   constructor(@SkipSelf() private roomservice: RoomsService) {
     // if the roomservice is public then it can also be accessed in the html template should not access services from the template
   }
+  rooms$ = this.roomservice.getRooms$.pipe(
+    catchError((error) => {
+      // just log the error and just return the empty array in case of error just return the empty array
+      // when we use any operators use inside the pipe
+      this.error$.next(error.message);
+      // whenever there is an error which is raised i am going to push the error in to the observable stream and subscriber can get that error message
+      //whenever you call next your changedetection is going to run again so you should not write the code in the component you can move it to service or another common place you want it to
+      // what we are doing whenever there is an exception now we are handling that error and subscribing to the error$
+      return of([]);
+    })
+  );
+  roomsCount$ = this.roomservice.getRooms$.pipe(map((rooms) => rooms.length));
+  // here we are just modifying the stream map is used to tranform the data
   ngOnInit(): void {
     // console.log(this.roomservice.getRooms());
     this.roomservice.getPhotos().subscribe((event) => {
@@ -98,11 +120,11 @@ export class RoomsComponent
       error: (err) => console.log(err),
     });
     this.stream.subscribe((data) => console.log(data));
-    this.roomservice.getRooms$.subscribe((rooms) => {
-      // here we are caching the request
-      this.roomList = rooms;
-      console.log(this.roomList);
-    });
+    // this.subscription = this.roomservice.getRooms$.subscribe((rooms) => {
+    //   // here we are caching the request
+    //   // you also want to unsubsribe the data when you are manually subscribing so you have to unsubscribe whenever dont need that to manually and if not it leads to peformance issues so there are alternatives to this also like async pipe etc
+    //   this.roomList = rooms;
+    // });
   }
   ngDoCheck(): void {
     console.log('onchanges is called');
@@ -159,5 +181,11 @@ export class RoomsComponent
     this.roomservice.delete('3').subscribe((data) => {
       this.roomList = data;
     });
+  }
+  ngOnDestroy(): void {
+    if (this.subscription) {
+      // if any subscription is active then unsubscribe to it thats the meaniing of the above code
+      this.subscription.unsubscribe();
+    }
   }
 }

@@ -2,6 +2,14 @@
 <app-header></app-header>
 <app-header></app-header>
 <app-header></app-header>
+{{ rooms$ | async | json }}
+<!-- When you have data coming from an observable (like rooms$), it arrives in a format that includes information about its asynchronous nature. This format can be thought of as a "wrapper" around the actual data. This wrapper includes additional information such as whether the data is still loading, has completed, or if there's an error.
+
+Now, when you're displaying this data in your Angular template, you typically don't need all that extra information about its asynchronous state. You just want the raw data itself.
+
+So, when we say the async pipe "unwraps" the data, we mean it removes this extra information and gives you direct access to the raw data without the wrapper. It's like taking off unnecessary layers of packaging to get to the product inside. This makes it easier to work with the data in your template because you're dealing directly with the values you're interested in, without the additional complexity of the asynchronous wrapper. -->
+<!-- here we are passing the stream to the async pipe which  will automatcally subscribe as well as whenever ngondestroy is called async pipe will automatically call the unsubscribe method-->
+<!-- whenver we have stream we have to use the async pipe  and use the json to display that data -->
 <div [hidden]="hideRooms">
   Number of rooms:
   <!-- binding NumberofRooms variable  with innerText property that is []  -->
@@ -17,10 +25,14 @@
 <div>
   <button (click)="addRoom()">Add Room</button>
 </div>
-<div *ngIf="hideRooms">
+<h1>Number of Rooms : {{ roomsCount$ | async }}</h1>
+<h1>{{ getError$ | async }}</h1>
+<!-- async pipe is used to subscribe to this getError$ observabale-->
+<div *ngIf="rooms$ | async as rooms">
+  <!-- avoid using mutiple async pipe on same stream rather do this above which will give the unwarpped data or pass the unwrapped data to the rooms -->
   <app-rooms-list
     (roomSelected)="selectRoom($event)"
-    [rooms]="roomList"
+    [rooms]="rooms"
     [title]="title"
   ></app-rooms-list>
   <!-- the $event is coming from the child component or this is the event that is recieved by my child component -->

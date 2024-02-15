@@ -11,8 +11,7 @@ import {
 } from '@angular/core';
 import { RoomsComponent } from './rooms/rooms.component';
 import { LoggerService } from './logger.service';
-import { LocalStorageToken } from './rooms/localstorage.token';
-import { inject } from '@angular/core/testing';
+// import { LocalStorageToken } from './rooms/localstorage.token';
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
@@ -22,8 +21,7 @@ export class AppComponent implements OnInit {
   title = 'hotelinventoryapp';
   role = 'Admin';
   constructor(
-    @Optional() private logger: LoggerService,
-    @Inject(LocalStorageToken) private storage: Storage
+    @Optional() private logger: LoggerService // @Inject(LocalStorageToken) private storage: Storage
   ) {
     // optional will not throw an error if there is an instance is available is okay if doesnt then execute it
   }
@@ -42,6 +40,6 @@ export class AppComponent implements OnInit {
   ngOnInit(): void {
     this.logger.Log('logger service');
     this.name.nativeElement.innerText = 'Rameshwaram Hotel';
-    this.storage.setItem('name', 'Rameshwaram Hotel');
+    // this.storage.setItem('name', 'Rameshwaram Hotel');
   }
 }
